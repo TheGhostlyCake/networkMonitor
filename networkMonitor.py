@@ -1,4 +1,3 @@
-from __future__ import print_function
 # Copyright 2013-2015 Pervasive Displays, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,25 +15,17 @@ from __future__ import print_function
 
  # License above available from papirus library: https://github.com/PiSupply/PaPiRus
 
-import os, json, urllib3, sys
-import requests
-import time
+from __future__ import print_function
+import os, json, urllib3, sys, requests, time
 from time import gmtime, strftime
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 from papirus import Papirus
-
-
-
-
-
 WHITE = 1
 BLACK = 0
-
-CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
-DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
-
+TITLE_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
+BODY_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
 
 # Check EPD_SIZE is defined
 EPD_SIZE=0.0
@@ -77,25 +68,65 @@ def netMan(papirus):
     draw = ImageDraw.Draw(image)
     width, height = image.size
 
-    clock_font_size = int((width - 4)/(8*0.65))      # 8 chars HH:MM:SS
-    clock_font = ImageFont.truetype(CLOCK_FONT_FILE, clock_font_size)
-    date_font_size = int((width - 10)/(10*0.65))     # 10 chars YYYY-MM-DD
-    date_font = ImageFont.truetype(DATE_FONT_FILE, date_font_size)
+    title_font_size = 12      # 8 chars HH:MM:SS
+    title_font = ImageFont.truetype(TITLE_FONT_FILE, clock_font_size)
+    body_font_size = 10     # 10 chars YYYY-MM-DD
+    body_font = ImageFont.truetype(BODY_FONT_FILE, body_font_size)
 
     # clear the display buffer
     draw.rectangle((0, 0, width, height), fill=WHITE, outline=WHITE)
-    previous_second = 0
-    previous_day = 0
+    previous_time = 0
+	previous_clients =0
+	previous_ads=0
+	previous_dns=0
+
+    draw.text((10, 10), 'NetMan', fill=BLACK, font=body_font)
+    
+	while True:
+		for x in range(0, 100):
+			if previous_ads != int(data['ads_blocked_today'])):
+				draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)		
+				draw.rectangle((5,10),"Ads Block: " + str(data['ads_blocked_today']), fill=BLACK, font=body_font)
+				previous_ads = data['ads_blocked_today'])
+			else:
+				draw.rectangle((5, 10, width - 5, 10 + clock_font_size), fill=WHITE, outline=WHITE)
+			papirus.display(image)
+			papirus.partial_update()
+			time.sleep(0.5)
+		papirus.update()
+	
+	
+
+	    
+
+
+
+
+
+
 
     while True:
-        draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)
-        draw.text((10, clock_font_size + 10), 'hi', fill=BLACK, font=date_font)
-        draw.text((5, 10), 'there', fill=BLACK, font=clock_font)
+        while True:
+            now = datetime.today()
+            if now.second != previous_second:
+                break
+            time.sleep(0.1)
+
+        if now.day != previous_day:
+            draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)
+            draw.text((10, clock_font_size + 10), '{y:04d}-{m:02d}-{d:02d}'.format(y=now.year, m=now.month, d=now.day), fill=BLACK, font=date_font)
+            previous_day = now.day
+        else:
+            draw.rectangle((5, 10, width - 5, 10 + clock_font_size), fill=WHITE, outline=WHITE)
+
+        draw.text((5, 10), '{h:02d}:{m:02d}:{s:02d}'.format(h=now.hour, m=now.minute, s=now.second), fill=BLACK, font=clock_font)
 
         # display image on the panel
         papirus.display(image)
-	time.sleep(10)
-        papirus.partial_update()
+        if now.second < previous_second:
+            papirus.update()    # full update every minute
+        else:
+            papirus.partial_update()
         previous_second = now.second
 
 
@@ -109,48 +140,3 @@ if "__main__" == __name__:
     except KeyboardInterrupt:
         sys.exit('interrupted')
         pass
-
-
-
-# # Same as calling "PapirusTextPos(True [,rotation = rot])"
-# text = PapirusTextPos(rotation=90)
-
-# # Write text to the screen at selected point, with an Id
-# # "hello world" will appear on the screen at (10, 10), font size 20, straight away
-# text.AddText("hello world", 10, 10, Id="Start" )
-
-# # Add another line of text, at the default location
-# # "Another line" will appear on screen at (0, 0), font size 20, straight away
-# text.AddText("Another line", Id="Top")
-
-# # Update the first line
-# # "hello world" will disappear and "New Text" will be displayed straight away
-# text.UpdateText("Start", "New Text")
-
-# # Remove The second line of text
-# # "Another line" will be removed from the screen straight away
-# text.RemoveText("Top")
-
-# # Clear all text from the screen
-# # This does a full update so is a little slower than just removing the text.
-# text.Clear()
-# def uptime:
-# 	from datetime import timedelta
-# # http://planzero.org/blog/2012/01/26/system_uptime_in_python,_a_better_way
-# 	with open('/proc/uptime', 'r') as f:
-#     	uptime_seconds = float(f.readline().split()[0])
-#     	uptime_string = str(timedelta(seconds = uptime_seconds))
-# 	print(uptime_string)
-
-# def connectiontype:
-# 	response1 = os.system("ping -c 1 " +hostname1)
-# 	response2 = os.system("ping -c 1 " +hostname2)
-# 	response3 = os.system("ping -c 1 " +hostname3)
-# 	response4 = os.system("ping -c 1 " +hostname4)
-
-# 	if response1 == 0:
-# 		print hostname, 'PiZero down!'
-# 		text.write("PiZero WiFi Down!")
-# 	else if response1 != 0 && response:
-# 		print hostname, "WifiUp"
-	
