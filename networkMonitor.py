@@ -32,13 +32,6 @@ CLOCK_FONT_FILE = '/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf'
 DATE_FONT_FILE  = '/usr/share/fonts/truetype/freefont/FreeMono.ttf'
 
 
-
-
-
-
-
-
-
 # Check EPD_SIZE is defined
 EPD_SIZE=0.0
 if os.path.exists('/etc/default/epd-fuse'):
@@ -55,14 +48,14 @@ if not (os.path.exists('/dev/gpiomem') and os.access('/dev/gpiomem', os.R_OK | o
         sys.exit()
 
 
-text.Clear()
-text.AddText("NetMan:", 0, 0, Id="start" )
-r = requests.get(url='http://10.0.0.95/admin/api.php')
-data=r.json()
-text.AddText("Ads Block: " + str(data['ads_blocked_today']), 0, 20,15,  Id="ads" )
-text.AddText("DNS queries: " + str(data['dns_queries_today']), 0, 35,15, Id="dns" )
-text.AddText("Active Clients: " + str(data['unique_clients']), 0, 50,15, Id="clients" )
-text.AddText("time: " + strftime("%Y-%m-%d %H:%M:%S", gmtime()), 0, 65, 12, Id="time" )
+# text.Clear()
+# text.AddText("NetMan:", 0, 0, Id="start" )
+# r = requests.get(url='http://10.0.0.95/admin/api.php')
+# data=r.json()
+# text.AddText("Ads Block: " + str(data['ads_blocked_today']), 0, 20,15,  Id="ads" )
+# text.AddText("DNS queries: " + str(data['dns_queries_today']), 0, 35,15, Id="dns" )
+# text.AddText("Active Clients: " + str(data['unique_clients']), 0, 50,15, Id="clients" )
+# text.AddText("time: " + strftime("%Y-%m-%d %H:%M:%S", gmtime()), 0, 65, 12, Id="time" )
 
 def main(argv):
     papirus = Papirus(rotation = int(argv[0]) if len(sys.argv) > 1 else 0)
@@ -110,6 +103,16 @@ def netMan(papirus):
         previous_second = now.second
 
 
+# main
+if "__main__" == __name__:
+    if len(sys.argv) < 1:
+        sys.exit('usage: {p:s}'.format(p=sys.argv[0]))
+
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt:
+        sys.exit('interrupted')
+        pass
 
 
 
