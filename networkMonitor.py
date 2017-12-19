@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright 2013-2015 Pervasive Displays, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +16,18 @@
 
  # License above available from papirus library: https://github.com/PiSupply/PaPiRus
 
-from papirus import PapirusTextPos
-import os, json, urllib3
+import os, json, urllib3, sys
 import requests
 import time
 from time import gmtime, strftime
-text = PapirusTextPos(rotation=0)
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
+from papirus import Papirus
+
+
+
+
 
 WHITE = 1
 BLACK = 0
@@ -61,7 +65,7 @@ def main(argv):
     papirus = Papirus(rotation = int(argv[0]) if len(sys.argv) > 1 else 0)
     print('panel = {p:s} {w:d} x {h:d}  version={v:s} COG={g:d} FILM={f:d}'.format(p=papirus.panel, w=papirus.width, h=papirus.height, v=papirus.version, g=papirus.cog, f=papirus.film))
     papirus.clear()
-    demo(papirus)
+    netMan(papirus)
 
 def netMan(papirus):
     """simple partial update demo - draw a clock"""
@@ -84,22 +88,14 @@ def netMan(papirus):
     previous_day = 0
 
     while True:
-        
-        if now.day != previous_day:
-            draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)
-            draw.text((10, clock_font_size + 10), 'hi', fill=BLACK, font=date_font)
-            previous_day = now.day
-        else:
-            draw.rectangle((5, 10, width - 5, 10 + clock_font_size), fill=WHITE, outline=WHITE)
-
+        draw.rectangle((2, 2, width - 2, height - 2), fill=WHITE, outline=BLACK)
+        draw.text((10, clock_font_size + 10), 'hi', fill=BLACK, font=date_font)
         draw.text((5, 10), 'there', fill=BLACK, font=clock_font)
 
         # display image on the panel
         papirus.display(image)
-        if now.second < previous_second:
-            papirus.update()    # full update every minute
-        else:
-            papirus.partial_update()
+	time.sleep(10)
+        papirus.partial_update()
         previous_second = now.second
 
 
