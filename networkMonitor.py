@@ -30,7 +30,7 @@ while(True):
 	text.clear() 
 	r = requests.get(url='http://10.0.0.95/admin/api.php')
 	data=r.json()
-	text.AddText("Ads Block: " + str(data['ads_blocked_today']), 0, 20,15,  Id="ads" )
+	text.AddText("Ads Block: " + str(data['ads_blocked_today']) + "\r\n" + "hi" , 0, 20,15,  Id="ads" )
 	text.AddText("DNS queries: " + str(data['dns_queries_today']), 0, 35,15, Id="dns" )
 	text.AddText("Active Clients: " + str(data['unique_clients']), 0, 50,15, Id="clients" )
 	text.AddText("time: " + strftime("%Y-%m-%d %H:%M:%S", gmtime()), 0, 65, 12, Id="time" )
